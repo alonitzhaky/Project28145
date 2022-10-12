@@ -69,16 +69,11 @@ def home():
 @app.route('/Customers/', methods = ['GET'])
 def AllCustomers(Name = ""):
     CustomerList = []
-    for Customer in Customers.query.all():
-    # FIXME: Check if code is true and functional. 
-        # if Name == Customers.Name:
-        #     SingleCustomer = Customers.query.all(Customers.Name == str(Name))
-        #     return {"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status}
-        if (Customer.Name == Name): 
-            SingleCustomer = Customers.query.all(Customers.Name == str(Name))
+    for SingleCustomer in Customers.query.all():
+        if (SingleCustomer.Name == Name): 
             return {"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status}
         else:
-            CustomerList.append({"ID": Customer.ID, "Name": Customer.Name, "Age": Customer.Age, "City": Customer.City, "Status": Customer.Status})
+            CustomerList.append({"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status})
     return CustomerList
 
 @app.route('/Customers/add', methods = ['POST'])

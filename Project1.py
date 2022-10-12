@@ -6,8 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TheLibrary.sqlite3'
 app.config['SECRET_KEY'] = "The Library of Alon"
-
 db = SQLAlchemy(app)
+
 # ~~~~~~~~~ Flask Initialization ~~~~~~~~~ #
 # ~~~~~~~~~~~~~~~~ TheLibrary Build ~~~~~~~~~~~~~~~~ #
 
@@ -89,6 +89,15 @@ def AddCustomer():
     db.session.commit()
     return f"Customer '{newCustomer.Name}' created."
 
+@app.route('/Customers/delete', methods = ['DELETE'])
+def DeleteCustomer():
+    # TODO: Add redirect to homepage + show on page "Deleted".
+    # FIXME: Check if request.args.get is relevant and needed for code (before line 96). 
+    SelectCustomer = Customers.query.get('CustomerID')
+    print(f'Customer ID is:', SelectCustomer)
+    db.session.delete(SelectCustomer)
+    db.session.commit()
+
 @app.route('/Books/', methods = ['GET'])
 def AllBooks():
     BookList = []
@@ -98,6 +107,8 @@ def AllBooks():
 
 @app.route('/Books/add', methods = ['POST'])
 def AddBook():
+# TODO: Test lines 122-129 when implementing HTML. 
+# FIXME: Add return redirect(url_for('home')) - Redirect to homepage after adding
     requestData = request.get_json()
     Name = requestData ['Name']
     Author = requestData ['Author']
@@ -107,9 +118,25 @@ def AddBook():
     newBook = Books(Name, Author, Published, Type)
     db.session.add(newBook)
     db.session.commit()
-    return f"Book '{newBook.Name}' added."
-# ~~~~~~~~~~~~ Operator's Options ~~~~~~~~~~~~ #
 
+    # if request.method == 'POST':
+    # NewBook = Books(Name = request.form['Name'], 
+    #                 Author = request.form['Author'], 
+    #                 Published = request.form ['Published'],
+    #                 Type = request.form ['Type'])
+    # db.session.add(NewBook)
+    # db.session.commit()
+    # return f"Book '{NewBook.Name}' added."
+
+@app.route('/Books/delete', methods = ['DELETE'])
+def DeleteBook():
+    # TODO: Add redirect to homepage + show on page "Deleted". 
+    SelectedBook = Books.query.get('BookID')
+    print(f'Book ID is:', SelectedBook)
+    db.session.delete(SelectedBook)
+    db.session.commit()
+    
+# ~~~~~~~~~~~~ Operator's Options ~~~~~~~~~~~~ #
 
 # ~~~~~~~~~~~~~~~~ TheLibrary Build ~~~~~~~~~~~~~~~~ #
 

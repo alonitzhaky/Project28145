@@ -79,7 +79,7 @@ def AllCustomers(Name = ""):
             return {"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status}
         else:
             CustomerList.append({"ID": Customer.ID, "Name": Customer.Name, "Age": Customer.Age, "City": Customer.City, "Status": Customer.Status})
-            return CustomerList
+    return CustomerList
 
 @app.route('/Customers/add', methods = ['POST'])
 def AddCustomer():

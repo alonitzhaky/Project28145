@@ -1,0 +1,97 @@
+from flask import Flask, request
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///Library_DATABASE.sqlite3"
+app.config["SECRET_KEY"] = "Omer's Library"
+
+db = SQLAlchemy(app)
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~ Library's Classes ~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~ User Class ~~~~~~~~~~ #
+class User(db.Model):
+    id = db.Column("UserID", db.Integer, primary_key = True)
+    name = db.Column("UserName", db.String(15), nullable = False)
+    age = db.Column("Age", db.Integer, nullable = False)
+    city = db.Column("City", db.String(25), nullable = False)
+    loans = db.relationship("Loan", backref = "user", lazy = True)
+
+    def __init__(self, name, age, city):
+        self.name = name
+        self.age = age
+        self.city = city
+# ~~~~~~~~~~ User Class ~~~~~~~~~~ #
+
+# ~~~~~~~~~~ Book Class ~~~~~~~~~~ #
+class Book(db.Model):
+    id = db.Column("BookID", db.Integer, primary_key = True)
+    name = db.Column("BookName", db.String(15), nullable = False)
+    author = db.Column("Author", db.String(40), nullable = False)
+    date = db.Column("PublishDate", db.String(10), nullable = False)
+    loantype = db.Column("LoanType", db.Integer, nullable = False)
+    loans = db.relationship("Loan", backref = "book", lazy = True)
+    
+    def __init__(self, name, author, date, loantype):
+        self.name = name
+        self.author = author
+        self.date = date
+        self.loantype = loantype
+# ~~~~~~~~~~ Book Class ~~~~~~~~~~ #
+
+# ~~~~~~~~~~ Loan Class ~~~~~~~~~~ #
+class Loan(db.Model):
+    id = db.Column("LoanID", db.Integer, primary_key = True)
+    user_id = db.Column("UserID", db.String(40), db.ForeignKey("user.UserID"))
+    book_id = db.Column("BookID", db.Integer, db.ForeignKey("book.BookID"))
+    loandate = db.Column("LoanDate", db.Integer, nullable = False)
+    returndate = db.Column("ReturnDate", db.Integer, nullable = False)
+
+    def __init__(self, book, user, loandate, returndate):
+        self.book = book
+        self.user = user
+        self.loandate = loandate
+        self.returndate = returndate
+# ~~~~~~~~~~ Loan Class ~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~ Library's Classes ~~~~~~~~~~~~~~~~~~~~ #
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~ Library's Options ~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~ User's Options ~~~~~~~~~~~~~~~~~~~~ #
+@app.route("/adduser/", methods = ["POST"])
+def User_add():
+    request_data = request.get_json()
+    name = request_data["name"]
+    age = request_data["age"]
+    city = request_data["city"]
+
+    new_user = User(name, age, city)
+    db.session.add(new_user)
+    db.session.commit()
+    return "User added successfully."
+# ~~~~~~~~~~~~~~~~~~~~ User's Options ~~~~~~~~~~~~~~~~~~~~ #
+
+# ~~~~~~~~~~~~~~~~~~~~ Book's Options ~~~~~~~~~~~~~~~~~~~~ #
+@app.route("/addbook/", methods = ["POST"])
+def Book_add():
+    request_data = request.get_json()
+    name = request_data["name"]
+    author = request_data["author"]
+    date = request_data["date"]
+    loantype = request_data["loantype"]
+
+    new_book = Book(name, author, date, loantype)
+    db.session.add(new_book)
+    db.session.commit()
+    return "Book added successfully."
+# ~~~~~~~~~~~~~~~~~~~~ Book's Options ~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~~~~~~~~~~~ Library's Options ~~~~~~~~~~~~~~~~~~~~ #
+
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)

@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~ Imports ~~~~~~~~~~~~~~ #
-from flask import Flask, request
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 # ~~~~~~~~~~~~~~ Imports ~~~~~~~~~~~~~~ #
 # ~~~~~~~~~ Flask Initialization ~~~~~~~~~ #
@@ -63,17 +63,27 @@ class Loan(db.Model):
 # ~~~~~~~~~~~~ Operator's Options ~~~~~~~~~~~~ #
 @app.route("/")
 def home():
-    return "Welcome!"
+    return render_template('index.html')
 
 @app.route('/Customers/<Name>')
-@app.route('/Customers/', methods = ['GET'])
+@app.route('/Customers', methods = ['GET'])
 def AllCustomers(Name = ""):
     CustomerList = []
     for SingleCustomer in Customers.query.all():
+        # ↓ Get specific customer informationLB
         if (SingleCustomer.Name == Name): 
-            return {"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status}
+            return {"ID": SingleCustomer.ID,
+                    "Name": SingleCustomer.Name,
+                    "Age": SingleCustomer.Age,
+                    "City": SingleCustomer.City,
+                    "Status": SingleCustomer.Status}
         else:
-            CustomerList.append({"ID": SingleCustomer.ID, "Name": SingleCustomer.Name, "Age": SingleCustomer.Age, "City": SingleCustomer.City, "Status": SingleCustomer.Status})
+        # ↓ If specific customer does not exist - Shows all table from SQLite3 DB.
+            CustomerList.append({"ID": SingleCustomer.ID,
+                                "Name": SingleCustomer.Name,
+                                "Age": SingleCustomer.Age,
+                                "City": SingleCustomer.City,
+                                "Status": SingleCustomer.Status})
     return CustomerList
 
 @app.route('/Customers/add', methods = ['POST'])
@@ -99,15 +109,19 @@ def DeleteCustomer():
     db.session.commit()
 
 @app.route('/Books/', methods = ['GET'])
-def AllBooks():
+def AllBooks(Book = ""):
     BookList = []
     for Book in Books.query.all():
-        BookList.append({"ID": Book.ID, "Name": Book.Name, "Author": Book.Author, "Published": Book.Published, "Type": Book.Type})
+        BookList.append({"ID": Book.ID,
+                        "Name": Book.Name,
+                        "Author": Book.Author,
+                        "Published": Book.Published,
+                        "Type": Book.Type})
     return BookList
 
 @app.route('/Books/add', methods = ['POST'])
 def AddBook():
-# TODO: Test lines 122-129 when implementing HTML. 
+# TODO: Test lines 134-141 when implementing HTML. 
 # FIXME: Add return redirect(url_for('home')) - Redirect to homepage after adding
     requestData = request.get_json()
     Name = requestData ['Name']
@@ -118,6 +132,8 @@ def AddBook():
     newBook = Books(Name, Author, Published, Type)
     db.session.add(newBook)
     db.session.commit()
+    return f"The Book '{newBook.Name}' was added."
+
 
     # if request.method == 'POST':
     # NewBook = Books(Name = request.form['Name'], 
@@ -131,6 +147,12 @@ def AddBook():
 @app.route('/Books/delete', methods = ['DELETE'])
 def DeleteBook():
     # TODO: Add redirect to homepage + show on page "Deleted". 
+    # TODO: Check 147-148
+    # IDCheck = request.args.get('BookID')
+    # print("book id is", book_id)
+    # SelectedBook = Books.query.get(IDCheck)
+    # print('BookID is', SelectedBook)
+
     SelectedBook = Books.query.get('BookID')
     print(f'Book ID is:', SelectedBook)
     db.session.delete(SelectedBook)
